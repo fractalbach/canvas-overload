@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>More Tiles</title>
+    </head>
+    <body>
+        <div id="game">
+            <div id="groundLayer" class="layer"></div>
+            <div id="playerLayer" class="layer"></div>
+            <div id="objectLayer" class="layer"></div>
+        </div>
+        <style>
+            #game, .layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                background: transparent;
+                pointer-events: none;
+            }
+
+            .layer > * {
+                pointer-events: auto;
+            }
+
+            .tile {
+                background: green;
+                border: 1px solid lightblue;
+                border: 1px solid #012;
+            }
+
+            .tile:hover {
+                background: cyan;
+            }
+
+            .tile:active {
+                background: red;
+            }
+
+            .tile:focus {
+                background: blue;
+            }
+        </style>
+        <script>
+            function generateGrid(nRows=40, nCols=40, width=20, height=20) {
+                let matrix = new Array(nRows);
+                let groundLayer = document.querySelector('#groundLayer');
+
+                let layerHeight = (height + 2) * nCols;
+                let layerWidth = (width + 2) * nRows;
+
+                let sheet = document.createElement('style');
+                sheet.innerHTML = `
+                #game, .layer {
+                    height:${layerHeight}px; 
+                    width:${layerWidth}px; 
+                } 
+                .tileRow { 
+                    width:${layerWidth}px; 
+                    height:${height + 2}px;
+                }
+                `;
+                document.body.appendChild(sheet);
+
+                for (let row = 0; row < nRows; row++) {
+                    matrix[row] = new Array(nCols);
+                    let rowElement = document.createElement('div');
+                    rowElement.className = 'tileRow';
+                    groundLayer.append(rowElement)
+
+                    for (let col = 0; col < nCols; col++) {
+                        let ele = document.createElement('canvas');
+                        ele.width = width;
+                        ele.height = height;
+                        ele.className = 'tile';
+                        rowElement.append(ele);
+                        matrix[row][col] = ele;
+                    }
+                }
+            }
+
+            function main() {
+                generateGrid(100, 100, 30, 30);
+            }
+
+            main();
+        </script>
+    </body>
+</html>
