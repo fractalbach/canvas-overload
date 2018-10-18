@@ -3,118 +3,121 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="style.css">
         <title>More Tiles</title>
+
+        <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76" href="icons/apple-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180x180.png">
+        <link rel="icon" type="image/png" sizes="192x192"  href="icons/android-icon-192x192.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="msapplication-TileColor" content="#00ccff">
+        <meta name="msapplication-TileImage" content="icons/ms-icon-144x144.png">
+        <meta name="theme-color" content="#00ccff">
+
     </head>
     <body>
         <div id="game">
-            <div id="groundLayer" class="layer"></div>
-            <div id="playerLayer" class="layer"></div>
-            <div id="objectLayer" class="layer"></div>
         </div>
         <div id="menubar">
             <div id="menubutton"></div>
         </div>
-        <style>
-            /*                     Fixed Overlay
-            ============================================================= */
-            #game {
-                position: fixed;
-                display: grid;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 3em;
-                overflow: auto;
-            }
+//         <style>
+//             /*                     Fixed Overlay
+//             ============================================================= */
+//             #game {
+//                 position: fixed;
+//                 display: grid;
+//                 top: 0;
+//                 left: 0;
+//                 right: 0;
+//                 bottom: 3em;
+//                 overflow: auto;
+//             }
 
-            #menubar {
-                background: purple;
-                display: grid;
-                position: fixed;
-                top: calc(100% - 3em);
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
+//             #menubar {
+//                 background: purple;
+//                 display: grid;
+//                 position: fixed;
+//                 top: calc(100% - 3em);
+//                 left: 0;
+//                 right: 0;
+//                 bottom: 0;
+//             }
 
-            body {
-                background: black;
-            }
+//             body {
+//                 background: black;
+//             }
 
-            /*                 Overlapping Game Layers
-            ============================================================= */
-            #game > * {
-                grid-row: 1 / 1;
-                grid-column: 1 / 1;
-            }
+//             /*                 Overlapping Game Layers
+//             ============================================================= */
+//             #game > * {
+//                 grid-row: 1 / 1;
+//                 grid-column: 1 / 1;
+//             }
 
-            /*                       Tile Effects
-            ============================================================= */
-            .tile {
-                background: green;
-                border: 1px solid #012;
-            }
+//             /*                       Tile Effects
+//             ============================================================= */
+//             .tile {
+//                 background: green;
+//                 border: 1px solid #012;
+//             }
 
-            .tile:hover {
-                background: cyan;
-                background: #c0ffee;
-            }
+//             .player:hover, .tile:hover {
+//                 border: 1px #c0ffee solid;
+//                 cursor: pointer;
+//             }
 
-            .tile:active {
-                background: red;
-            }
+//             /*              Auto-adjusting Tile Widths & Heights
+//             ============================================================= */
+//             #groundLayer {
+//                 white-space: nowrap;
+//             }
 
-            /*              Auto-adjusting Tile Widths & Heights
-            ============================================================= */
-            #groundLayer {
-                white-space: nowrap;
-            }
+//             .player, .tile {
+//                 min-width: 25px;
+//                 min-height: 25px;
+//                 max-width: 50px;
+//                 max-height: 50px;
+//             }
 
-            .tile {
-                min-width: 25px;
-                min-height: 25px;
-                width: 10vw;
-                height: 10vw;
-                max-width: 50px;
-                max-height: 50px;
-            }
+//             .tileRow {
+//                 height: auto;
+//                 display: flex;
+//             }
 
-            .tileRow {
-                height: auto;
-                display: flex;
-            }
-        </style>
-        <script>
-            function generateGrid(nRows=40, nCols=40, width=20, height=20) {
-                let matrix = new Array(nRows);
-                let groundLayer = document.querySelector('#groundLayer');
+//             @media orientation: landscape {
+//                 .player, .tile {
+//                     width: 10vh;
+//                     height: 10vh;
+//                 }
+//             }
 
-                for (let row = 0; row < nRows; row++) {
-                    matrix[row] = new Array(nCols);
-                    let rowElement = document.createElement('div');
-                    rowElement.className = 'tileRow';
-                    groundLayer.append(rowElement);
+//             @media orientation: portrait {
+//                 .player, .tile {
+//                     width: 10vw;
+//                     height: 10vw;
+//                 }
+//             }
 
-                    for (let col = 0; col < nCols; col++) {
-                        let ele = document.createElement('canvas');
-                        ele.width = width;
-                        ele.height = height;
-                        ele.className = 'tile';
-                        rowElement.append(ele);
-                        matrix[row][col] = ele;
-                    }
-                }
-            }
+//             /*                      Player Canvas
+//             ============================================================= */
+//             .player {
+//                 background: blue;
+//                 border-radius: 10vw;
+//                 margin: 1px;
+//             }
 
-            function max(a, b) {
-                return (a < b) ? b : a;
-            }
-
-            /*                            Main
-            ============================================================= */
-            (function() {
-                generateGrid(30, 30, 50, 50);
-            }());
-        </script>
+//         </style>
+        <script type="module" src="main.js"></script>
     </body>
 </html>

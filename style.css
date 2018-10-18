@@ -1,0 +1,93 @@
+
+            /*                     Fixed Overlay
+            ============================================================= */
+            #game {
+                position: fixed;
+                display: grid;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 3em;
+                overflow: auto;
+            }
+
+            #menubar {
+                background: purple;
+                display: grid;
+                position: fixed;
+                top: calc(100% - 3em);
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+
+            body {
+                background: black;
+            }
+
+            /*                 Overlapping Game Layers
+            ============================================================= */
+            #game > * {
+                grid-row: 1 / 1;
+                grid-column: 1 / 1;
+                background: transparent;
+                pointer-events: none;
+            }
+
+#game > * > * {
+    pointer-events: all;
+}
+
+            /*                       Tile Effects
+            ============================================================= */
+            .tile {
+                background: green;
+                border: 1px solid #012;
+            }
+
+            .player:hover, .tile:hover {
+                border: 1px #c0ffee solid;
+                cursor: pointer;
+            }
+
+            /*              Auto-adjusting Tile Widths & Heights
+            ============================================================= */
+            #groundLayer {
+                white-space: nowrap;
+            }
+
+            .player, .tile {
+                min-width: 25px;
+                min-height: 25px;
+                max-width: 50px;
+                max-height: 50px;
+            }
+
+            .tileRow {
+                height: auto;
+                display: flex;
+            }
+
+            @media orientation: landscape {
+                .player, .tile {
+                    width: 10vh;
+                    height: 10vh;
+                }
+            }
+
+            @media orientation: portrait {
+                .player, .tile {
+                    width: 10vw;
+                    height: 10vw;
+                }
+            }
+
+            /*                      Player Canvas
+            ============================================================= */
+            .player {
+                background: blue;
+                border-radius: 10vw;
+                margin: 1px;
+            }
+
+        
