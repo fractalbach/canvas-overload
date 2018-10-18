@@ -3,9 +3,12 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="style.css">
+        <link rel="manifest" href="manifest.json">
         <title>More Tiles</title>
-
+        <description>A bunch of interactive tiles on a webpage!</description>
+        <author>Fractalbach</author>
+        <!-- Icons -->
         <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-icon-57x57.png">
         <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-icon-60x60.png">
         <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-icon-72x72.png">
@@ -15,109 +18,24 @@
         <link rel="apple-touch-icon" sizes="144x144" href="icons/apple-icon-144x144.png">
         <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-icon-152x152.png">
         <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180x180.png">
-        <link rel="icon" type="image/png" sizes="192x192"  href="icons/android-icon-192x192.png">
+        <link rel="icon" type="image/png" sizes="192x192" href="icons/android-icon-192x192.png">
         <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png">
         <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
-        <link rel="manifest" href="/manifest.json">
         <meta name="msapplication-TileColor" content="#00ccff">
         <meta name="msapplication-TileImage" content="icons/ms-icon-144x144.png">
         <meta name="theme-color" content="#00ccff">
-
     </head>
     <body>
-        <div id="game">
-        </div>
+        <div id="game"></div>
         <div id="menubar">
             <div id="menubutton"></div>
         </div>
-//         <style>
-//             /*                     Fixed Overlay
-//             ============================================================= */
-//             #game {
-//                 position: fixed;
-//                 display: grid;
-//                 top: 0;
-//                 left: 0;
-//                 right: 0;
-//                 bottom: 3em;
-//                 overflow: auto;
-//             }
-
-//             #menubar {
-//                 background: purple;
-//                 display: grid;
-//                 position: fixed;
-//                 top: calc(100% - 3em);
-//                 left: 0;
-//                 right: 0;
-//                 bottom: 0;
-//             }
-
-//             body {
-//                 background: black;
-//             }
-
-//             /*                 Overlapping Game Layers
-//             ============================================================= */
-//             #game > * {
-//                 grid-row: 1 / 1;
-//                 grid-column: 1 / 1;
-//             }
-
-//             /*                       Tile Effects
-//             ============================================================= */
-//             .tile {
-//                 background: green;
-//                 border: 1px solid #012;
-//             }
-
-//             .player:hover, .tile:hover {
-//                 border: 1px #c0ffee solid;
-//                 cursor: pointer;
-//             }
-
-//             /*              Auto-adjusting Tile Widths & Heights
-//             ============================================================= */
-//             #groundLayer {
-//                 white-space: nowrap;
-//             }
-
-//             .player, .tile {
-//                 min-width: 25px;
-//                 min-height: 25px;
-//                 max-width: 50px;
-//                 max-height: 50px;
-//             }
-
-//             .tileRow {
-//                 height: auto;
-//                 display: flex;
-//             }
-
-//             @media orientation: landscape {
-//                 .player, .tile {
-//                     width: 10vh;
-//                     height: 10vh;
-//                 }
-//             }
-
-//             @media orientation: portrait {
-//                 .player, .tile {
-//                     width: 10vw;
-//                     height: 10vw;
-//                 }
-//             }
-
-//             /*                      Player Canvas
-//             ============================================================= */
-//             .player {
-//                 background: blue;
-//                 border-radius: 10vw;
-//                 margin: 1px;
-//             }
-
-//         </style>
         <script type="module" src="main.js"></script>
+        <script>
+            if ('serviceWorker'in navigator) {
+                navigator.serviceWorker.register('/sw.js');
+            }
+        </script>
     </body>
 </html>

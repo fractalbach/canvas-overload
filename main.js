@@ -9,13 +9,12 @@ function max(a, b) {
 
 function makeLayer(name) {
     let ele = document.createElement('div');
-    ele.className = 'layer';
+    ele.classList.add('layer');
     ele.id = name;
     return ele;
 }
 function highlightTarget(event) {
-        console.log(event)
-        event.target.style.background = 'cyan';
+        event.target.classList.add('highlighted');
     };
 
 class GameGrid {
@@ -26,21 +25,19 @@ class GameGrid {
         for (let row = 0; row < nRows; row++) {
             this.matrix[row] = new Array(nCols);
             let rowElement = document.createElement('div');
-            rowElement.className = 'tileRow';
+            rowElement.classList.add('tileRow');
             this.grid.append(rowElement);
 
             for (let col = 0; col < nCols; col++) {
                 let ele = document.createElement('canvas');
                 ele.width = width;
                 ele.height = height;
-                ele.className = 'tile';
+                ele.classList.add('tile');
                 rowElement.append(ele);
                 this.matrix[row][col] = ele;
             }
         }
     }
-
-    
 }
 
 
@@ -57,11 +54,13 @@ class GameGrid {
 
     game.appendChild(gamegrid.grid);
     game.appendChild(playerLayer);
-   
-        game.addEventListener('mousedown', highlightTarget);
-        game.addEventListener('click', highlightTarget);
-    
+
+    game.addEventListener('mousedown', highlightTarget);
+    game.addEventListener('click', highlightTarget);
+
     
     let p = new Player(w,h);
     document.querySelector('#playerLayer').appendChild(p.canvas);
 }());
+
+

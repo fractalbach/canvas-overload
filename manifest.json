@@ -1,15 +1,17 @@
 {
  "name": "Tile Game",
  "short_name": "TileGame",
+ "start_url": "/",
  "display": "standalone",
- "background_color": "#0cf",
+ "theme_color": "#6d30da",
+ "background_color": "#6d30da",
  "description": "A game with Tiles.",
- ​​"orientation": "portrait-primary",
+ "orientation": "portrait-primary",
  "prefer_related_applications": true,
  "related_applications": [
   {
     "platform": "web",
-    "url": "https://fractalbach.github.io/TileExperiments/",
+    "url": "https://fractalbach.github.io/TileExperiments/"
   }
   ],
  "icons": [
