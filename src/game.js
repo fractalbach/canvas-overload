@@ -1,3 +1,32 @@
+/* 
+_______________________________________________________________________
+                             Display
+=======================================================================
+Display handles:
+    - graphics
+    - interactions
+    - document objects
+*/
+class Display {
+    constructor(rows, cols) {
+        // grid: the area with all of the canvas tiles.
+        this.grid = new Grid(rows, cols, 50, 50);
+
+        // playerLayer: the transparent div where player canvases are.
+        this.playerLayer = makeLayer('playerLayer');
+
+        // Display.element is the DOM representation of the game. 
+        this.element = document.querySelector('#game');
+        this.element.appendChild(this.grid.element);
+        this.element.addEventListener('mousedown', highlightTarget);
+        this.element.addEventListener('click', highlightTarget);   
+    }
+    Add(entity, name) {}
+
+    Move(entity) {
+        entity.target
+    }
+}
 
 
 function makeLayer(name) {
@@ -7,10 +36,9 @@ function makeLayer(name) {
     return ele;
 }
 
-
 function highlightTarget(event) {
     event.target.classList.add('highlighted');
-};
+}
 
 
 class Grid {
@@ -33,24 +61,19 @@ class Grid {
                 this.matrix[row][col] = ele;
             }
         }
-    };
-
+    }
     tile(row, col) {
         return this.matrix[row][col];
-    };
+    }
 }
 
-
-export class Player {
+class PlayerCanvas {
     constructor(width=20, height=20) {
         this.canvas = document.createElement('canvas');
         this.canvas.className = 'player';
         this.canvas.width = width;
         this.canvas.height = height;
-
-        console.log(Grid);
     }
-
 }
 
 // Point is a pixel location literal. 
@@ -68,9 +91,29 @@ class Point {
     }
 }
 
+
+
+
+
+/* 
+_______________________________________________________________________
+                             State
+=======================================================================
+State handles:
+    - game logic
+    - timers
+    - keeps track of actual player positions.
+*/
+class State {
+    constructor() {
+        this.players = new Map();
+    }
+}
+
+
 // A location is a logical location.
 class Location {
-    constructor(row=-1, col=-1) {
+    constructor(row=-1, col=-1, z=-1) {
         this.row = row;
         this.col = col;
     }
@@ -80,45 +123,45 @@ class Location {
 class Entity {
     constructor(row=-1, col=-1) {
         this.location = new Location(row, col);
+        this.targetLocation = new Location(-1, -1);
+    }
+}
+class Player extends Entity {
+    constructor(username) {
+        super(Entity);
+        this.username = username;
     }
 }
 
 
 
 
-class Display {
-    constructor(rows, cols) {
-        // grid: the area with all of the canvas tiles.
-        this.grid = new Grid(rows, cols, 50, 50);
-
-        // playerLayer: the transparent div where player canvases are.
-        this.playerLayer = makeLayer('playerLayer');
-
-        // Display.element is the DOM representation of the game. 
-        this.element = document.querySelector('#game');
-        this.element.appendChild(this.grid.element);
-        this.element.addEventListener('mousedown', highlightTarget)
-        this.element.addEventListener('click', highlightTarget)
-        
-    }
-
-    Add(entity) {
-        
-    }
-
-    Move(entity) {
-
-    }
-}
 
 
-class State {
-    constructor() {
-        this.players = {};
-    }
-}
+
+ 
+
+/* 
+_______________________________________________________________________
+                             Class Game
+=======================================================================
+Class Game unifies the Display and the State by bridiging 
+the logic  with the visuals.
 
 
+
+Information Travel:
+------------------------------------------------
+
+     [Display]  <---[User Interactions]
+         |
+      [Game]          
+        |
+     [State]  <---[Timers or Network Data ]
+
+    
+
+*/ 
 export class Game {
     constructor() {
         this.display = new Display(30, 30);
