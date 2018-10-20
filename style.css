@@ -8,6 +8,9 @@
     right: 0;
     bottom: 3em;
     overflow: auto;
+
+    top:3em;
+    bottom: 0;
 }
 
 #menubar {
@@ -18,12 +21,18 @@
     left: 0;
     right: 0;
     bottom: 0;
+
+    top:0;
+    bottom: calc(100% - 3em);
 }
 
 body {
     background: black;
 }
 
+.layer {
+    position: absolute;
+}
 
 /*               Overlapping Game Layers
 ============================================================= */
@@ -57,8 +66,8 @@ body {
 }
 
 .player, .tile {
-    min-width: 25px;
-    min-height: 25px;
+    min-width: 20px;
+    min-height: 20px;
     max-width: 50px;
     max-height: 50px;
 }
@@ -88,11 +97,21 @@ body {
     background: blue;
     border-radius: 10vw;
     margin: 1px;
+    position: relative;
 }
-
 
 /*                   Highlighted Objects
 ============================================================= */
 .tile.highlighted {
     background: #9d76e2;
+}
+
+
+/*                         Fun Title
+============================================================= */
+#menu-title {
+    padding: 0;
+    margin: auto auto;
+    text-align: center;
+    color: white;
 }
