@@ -33,12 +33,13 @@ function highlightTarget(event) {
     event.target.classList.add('highlighted');
 }
 
-
 let uid = 123;
 function nextUid() {
     uid++;
     return uid;
 }
+
+let resizeTimer;
 
 /* 
 _______________________________________________________________________
@@ -65,8 +66,8 @@ class Display
         // Display.element is the DOM representation of the game. 
         this.element = document.querySelector('#game');
 
-        // A collection of general-purpose canvas elements.
-        this.entities = new Map();
+        // A collection of entities (aka ents).
+        this.ents = new Map();
 
         // Call init procedure.
         this.init();
@@ -74,56 +75,90 @@ class Display
 
     init() {
         // Add the grid to the game area. 
-
         this.element.appendChild(this.grid.element);
         this.element.appendChild(this.playerLayer);
 
 
-        // Add global event listeners
+        // Interactions with the Display
         this.element.addEventListener('mousedown', highlightTarget);
         this.element.addEventListener('click', highlightTarget);
+
+        // Auto-adjust object positions whenever screen is resized.
+        window.addEventListener('resize', ()=> this.refreshPositions());
 
         // Add the display element to the game.
         // document.body.appendChild(this.element);
     }
 
+    refreshPositions() {
+        for (let e of this.ents.values()) {
+            this.updatePosition(e);
+        }
+    }
+
     add(key, element) {
-        this.entities.set(key, element);
+        this.ents.set(key, element);
     }
 
     getEle(key) {
-        return this.entities.get(key);
+        return this.ents.get(key);
     }
 
-    addPlayer(key) {
+    addPlayer(key, entity) {
         let attrs = {
             id: `player${nextUid()}`,
             class: 'player',
             width: TILE_SIZE,
             height: TILE_SIZE,
-        };
-        let e = makeElement('canvas', attrs);
-        this.add(key, e);
-        this.playerLayer.appendChild(e);
+        }
+        let element = makeElement('canvas', attrs);
+        let ent = new DisplayEntity(entity, element);
+        this.add(key, ent);
+        this.updatePosition(ent);
+        this.playerLayer.appendChild(element);
     }
 
     setLocation(key, location) {
-        if (!this.entities.has(key)) {
+        if (!this.ents.has(key)) {
             console.warn(`Display.setLocation: The key '${key.toString()}' hasn't been registered.`);
             return;
         }
-        let e = this.entities.get(key);
-        let pixel = this.LocToPixel(location);
-        e.style.left = pixel.px;
-        e.style.top = pixel.py;
-        console.log(`location of ${key.toString()} set to: (left, top) = `, pixel)
+        let e = this.ents.get(key);
+        e.location = location;
+        this.updatePosition(e);
     }
 
     LocToPixel(location) {
         let tile = this.grid.tileAt(location);
-        return new PixelPoint(tile.offsetLeft, tile.offsetTop)
+        return new PixelPoint(tile.offsetLeft, tile.offsetTop);
+    }
+
+    updatePosition(displayEntity) {
+        let pixel = this.LocToPixel(displayEntity.location);
+        displayEntity.element.style.left = pixel.px;
+        displayEntity.element.style.top = pixel.py;
+    }
+
+}
+
+// combines the logical location of an Entity with its DOM element.
+class DisplayEntity {
+    constructor(entity, element) {
+        this.entity = entity;
+        this.element = element;
+    }
+
+    get location() {
+        return this.entity.location;
+    }
+
+    set location(location) {
+        this.entity.location = location;
     }
 }
+
+
+
 
 class Grid 
 {
@@ -189,6 +224,36 @@ class PixelPoint {
 }
 
 
+/* 
+_______________________________________________________________________
+                Nouns:    People, Places, and Things
+=======================================================================
+*/ 
+
+// A location is a logical location.
+class Location {
+    constructor(row=0, col=0) {
+        this.row = row;
+        this.col = col;
+    }
+}
+
+// An entity is a person or thing that has a location in the world.
+class Entity {
+    constructor(element, row=0, col=0) {
+        this.location = new Location(row, col);
+        this.targetLocation = new Location(row, col);
+    }
+}
+
+class Player extends Entity {
+    constructor(username) {
+        super(Entity);
+        this.username = username;
+    }
+}
+
+
 
 
 
@@ -219,45 +284,7 @@ class State {
     mergeWithServerData() {
         Object.assign(this.data, this.serverData);
     }
-    addPlayer(username) {
-        this.players.set(username, new Player())
-    }
 }
-
-
-
-
-
-
-/* 
-_______________________________________________________________________
-                Nouns:    People, Places, and Things
-=======================================================================
-*/ 
-
-// A location is a logical location.
-class Location {
-    constructor(row=-1, col=-1) {
-        this.row = row;
-        this.col = col;
-    }
-}
-
-// An entity is a person or thing that has a location in the world.
-class Entity {
-    constructor(row=-1, col=-1) {
-        this.location = new Location(row, col);
-        this.targetLocation = new Location(-1, -1);
-    }
-}
-
-class Player extends Entity {
-    constructor(username) {
-        super(Entity);
-        this.username = username;
-    }
-}
-
 
 
 
@@ -311,8 +338,9 @@ export class Game {
     }
 
     addPlayer(key) {
-        this.state.addPlayer(key);
-        this.display.addPlayer(key);
+        let p = new Player();
+        this.state.players.set(key, p);
+        this.display.addPlayer(key, p);
     }
 
     getPlayerElement(key) {
@@ -355,7 +383,7 @@ function test(game) {
     game.addPlayer(me);
     game.movePlayer(me, 1, 2);
 
-    console.log(game.display.entities)
+    console.log(game.display.entities);
 
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
