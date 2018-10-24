@@ -1,6 +1,6 @@
 /*                     Fixed Overlay
 ============================================================= */
-#game {
+#Display {
     position: fixed;
     display: grid;
     overflow: auto;
@@ -22,14 +22,16 @@ body {
 
 /*               Overlapping Game Layers
 ============================================================= */
-#game > * {
+#Display > * {
     grid-row: 1 / 1;
     grid-column: 1 / 1;
     background: transparent;
     pointer-events: none;
+    /* display: flex; */
+    /* width: auto; */
 }
 
-#game > * > * {
+#Display > * > * {
     pointer-events: auto;
 }
 
@@ -45,9 +47,13 @@ body {
     cursor: pointer;
 }
 
+.player:active, .tile:active {
+    background: purple;
+}
+
 /*              Auto-adjusting Tile Widths & Heights
 ============================================================= */
-#groundLayer {
+#DisplayGrid {
     white-space: nowrap;
 }
 
@@ -63,11 +69,14 @@ body {
     display: flex;
 }
 
+/*    Adjustments based on  Width / Height of Window
+============================================================= */
 @media (orientation: landscape) {
     .player, .tile {
         width: 10vh;
         height: 10vh;
     }
+
     #menubar {
         top: 0;
         bottom: 0;
@@ -76,7 +85,8 @@ body {
         writing-mode: vertical-lr;
         writing-mode: sideways-lr;
     }
-    #game {
+
+    #Display {
         top: 0;
         bottom: 0;
         right: 0;
@@ -89,17 +99,19 @@ body {
         width: 10vw;
         height: 10vw;
     }
-    #game {
+
+    #Display {
         left: 0;
         right: 0;
         top: 3em;
         bottom: 0;
     }
+
     #menubar {
         left: 0;
         right: 0;
         top: 0;
-        bottom: calc(100% - 3em);    
+        bottom: calc(100% - 3em);
     }
 }
 
@@ -117,7 +129,6 @@ body {
 .tile.highlighted {
     background: #9d76e2;
 }
-
 
 /*                         Fun Title
 ============================================================= */
