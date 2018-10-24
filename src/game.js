@@ -7,6 +7,7 @@ _______________________________________________________________________
 */
 
 const TILE_SIZE = 50;
+const N_TILES = 30;
 const ME = "myplayer";
 var GAME;
 
@@ -183,6 +184,16 @@ class Entity {
         this.pace = 300;
         this.lock = false;
 
+        this.anim = {
+            isDone: true,
+            x0: 0,
+            y0: 0,
+            xf: 0,
+            yf: 0,
+            t0: 0,
+            tf: 0
+        };
+
     }
 
     alignWith(element) {
@@ -208,23 +219,76 @@ class Entity {
         return ((this.currentRow === this.targetRow) && (this.currentCol === this.targetCol));
     }
 
+    isAtNext() {
+        return ((this.currentRow === this.nextRow) && (this.currentCol === this.nextCol));
+    }
+    
+//     updateFrame() {
+//         if (this.lock) {
+//             // console.warn('locked.', this);
+//             return;
+//         }
+//         if (this.isAtTarget()) {
+//             return;
+//         }
+//         [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
+//         // console.warn(`Next Location = (${this.nextRow}, ${this.nextCol})`)
+        
+//         let [x0, y0] = this.grid.locationToXY(this.currentRow, this.currentCol);
+//         let [xf, yf] = this.grid.locationToXY(this.nextRow, this.nextCol);
+//         let pace = this.pace;
+//         let ent = this;
+//         startFrameLoop(x0, y0, xf, yf, ent);
+//     }
 
-    updateFrame() {
-        if (this.lock) {
-            // console.warn('locked.', this);
-            return;
-        }
+    doFrame(timestamp) 
+    {
+        // If the entity is already at it's target, there is no need to move.
         if (this.isAtTarget()) {
             return;
         }
-        [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
-        // console.warn(`Next Location = (${this.nextRow}, ${this.nextCol})`)
-        
-        let [x0, y0] = this.grid.locationToXY(this.currentRow, this.currentCol);
-        let [xf, yf] = this.grid.locationToXY(this.nextRow, this.nextCol);
-        let pace = this.pace;
-        let ent = this;
-        startFrameLoop(x0, y0, xf, yf, ent);
+
+        // The animation is done once it's reached the next tile (or it hasn't started yet.)
+        if (this.anim.isDone) {
+
+            // Restart the start/finish time to ensure the entity. reaches the next tile at the correct time.
+            // This maintains a consistent animation regardless of how much time has passed between
+            // each animation frame.
+            this.anim.t0 = performance.now();
+            this.anim.tf = this.anim.t0 + this.pace;
+
+            // Calculate the pixel locations of the current tile and the next tile.
+            // This provides points of reference for interpolation.
+            [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
+            [this.anim.x0, this.anim.y0] = this.grid.locationToXY(this.currentRow, this.currentCol);
+            [this.anim.xf, this.anim.yf] = this.grid.locationToXY(this.nextRow, this.nextCol);
+            
+            // Save the animation state.
+            this.anim.isDone = false;
+        }
+
+        // At this point, the animation is running.
+
+        // Determine the amount that has passed since we left the tile.
+        let t = timestamp - this.anim.t0;
+
+        // Check to see if we have reached the next tile yet.
+        // If we have, we are finished with the animation.
+        if (this.anim.tf < timestamp) {
+            this.currentRow = this.nextRow;
+            this.currentCol = this.nextCol;
+            this.alignWithGrid();
+            this.anim.isDone = true;
+            return;
+        }
+
+        // At this point, we are within the animation itself.
+
+        // Calculate the new (x,y) through linear interpolation.
+        let x = ((this.anim.xf - this.anim.x0) / (this.anim.tf - this.anim.t0))*t + this.anim.x0;
+        let y = ((this.anim.yf - this.anim.y0) / (this.anim.tf - this.anim.t0))*t + this.anim.y0;
+        this.alignWithPixel(x, y);
+        return;
     }
 
 }
@@ -331,7 +395,7 @@ export class Game {
         let ent = this.state.players.get(key);
         ent.targetRow = row;
         ent.targetCol = col;
-        ent.updateFrame();
+        // ent.updateFrame();
     }
 };
 
@@ -367,20 +431,47 @@ function test(game) {
     game.addPlayer(ME);
     game.setLocation(ME, 1, 2);
     game.setTarget(ME, 1, 3);
+
+    // used for random names.
+    let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let randString = (n) => {
+        let s = "";
+        for (let i=0; i<n; i++) {
+            s += possible.charAt(Math.floor(Math.random()*possible.length));
+        }        
+        return s;
+    }
+    let randTile = () => Math.floor(Math.random() * N_TILES);
     
+
+    // Add 10 random players, moving to random locations.
+    for (let i=0; i<10; i++) {
+        let name = randString(10);
+        let startX = randTile();
+        let startY = randTile();
+        let targetX = randTile();
+        let targetY = randTile();
+        game.addPlayer(name);
+        game.setLocation(name, startX, startY);
+        game.setTarget(name, targetX, targetY);
+    }
+    
+    
+    let me = game.players
 
     let doHighlight = function(event) {
         if (!event.target.classList.contains('tile')) {
             return;
         }
         let [row, col] = game.display.grid.locationOfTile(event.target);
-        // console.log('Clicked:', event.target, `location:(${row}, ${col})`);
+        console.log('Clicked:', event.target, `location:(${row}, ${col})`, ME);
         game.setTarget(ME, row, col);
     }
     
     console.log(game.display.ents);
     game.display.element.addEventListener('mousedown', doHighlight);
 
+    window.requestAnimationFrame(mainloop);
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -391,29 +482,38 @@ _______________________________________________________________________
 
 
 
-const startFrameLoop = (x0, y0, xf, yf, ent) => {
-    let t0 = performance.now();
-    let tf = t0 + ent.pace;
-    let counter = 0;
-    ent.lock = true;
+// const startFrameLoop = (x0, y0, xf, yf, ent) => {
+//     let t0 = performance.now();
+//     let tf = t0 + ent.pace;
+//     let counter = 0;
+//     ent.lock = true;
 
-    function frameStep(timestamp) {
-        counter++;
-        let t = timestamp - t0;
-        if (tf < timestamp) {
-            // console.warn(`Frame Loop Complete! Number of Steps: ${counter}`, ent);
-            ent.currentRow = ent.nextRow;
-            ent.currentCol = ent.nextCol;
-            ent.alignWithGrid();
-            ent.lock = false;
-            ent.updateFrame();
-            return;
-        }
-        let x = ((xf - x0) / (tf - t0))*t + x0;
-        let y = ((yf - y0) / (tf - t0))*t + y0;
-        ent.alignWithPixel(x, y);
-        window.requestAnimationFrame(frameStep);
+//     function frameStep(timestamp) {
+//         counter++;
+//         let t = timestamp - t0;
+//         if (tf < timestamp) {
+//             // console.warn(`Frame Loop Complete! Number of Steps: ${counter}`, ent);
+//             ent.currentRow = ent.nextRow;
+//             ent.currentCol = ent.nextCol;
+//             ent.alignWithGrid();
+//             ent.lock = false;
+//             ent.updateFrame();
+//             return;
+//         }
+//         let x = ((xf - x0) / (tf - t0))*t + x0;
+//         let y = ((yf - y0) / (tf - t0))*t + y0;
+//         ent.alignWithPixel(x, y);
+//         window.requestAnimationFrame(frameStep);
+//     }
+
+//     window.requestAnimationFrame(frameStep);
+// }
+
+
+const mainloop = (timestamp) => {
+    for (let [key, ent] of GAME.display.ents) {
+        ent.doFrame(timestamp);
     }
-
-    window.requestAnimationFrame(frameStep);
+    window.requestAnimationFrame(mainloop);
 }
+
