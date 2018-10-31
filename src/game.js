@@ -1,4 +1,4 @@
-/* 
+/*
 _______________________________________________________________________
                         Constants and Variables
 =======================================================================
@@ -9,9 +9,11 @@ _______________________________________________________________________
 const TILE_SIZE = 50;
 const N_TILES = 30;
 const ME = "myplayer";
+
+var MYPLAYER;
 var GAME;
 
-/* 
+/*
 _______________________________________________________________________
                              Utility Functions
 =======================================================================
@@ -32,7 +34,7 @@ class util {
     }
 }
 
-/* 
+/*
 _______________________________________________________________________
                              Display
 =======================================================================
@@ -50,7 +52,7 @@ class Display {
         // grid: the area with all of the canvas tiles.
         this.grid = new Grid(rows, cols, TILE_SIZE, TILE_SIZE);
 
-        // Display.element is the DOM representation of the game. 
+        // Display.element is the DOM representation of the game.
         this.element = document.querySelector('#Display');
 
         // entLayer: the transparent div where entity canvases are.
@@ -94,13 +96,13 @@ class Grid {
 
 
         // Initialize the matrix and create each of the tiles.
-        for (let row = 0; row < nRows; row++) 
+        for (let row = 0; row < nRows; row++)
         {
             this.matrix[row] = new Array(nCols);
             let rowElement = util.makeElement('div', {class: 'tileRow'});
             this.element.append(rowElement);
 
-            for (let col = 0; col < nCols; col++) 
+            for (let col = 0; col < nCols; col++)
             {
                 let tile = util.makeElement('canvas', {
                     width: width,
@@ -128,11 +130,11 @@ class Grid {
     }
 }
 
-/* 
+/*
 _______________________________________________________________________
                 Nouns:    People, Places, and Things
 =======================================================================
-*/ 
+*/
 
 const areArrsEqual = (arr1, arr2) => {
     if (arr1.length !== arr2.length) {
@@ -147,22 +149,26 @@ const areArrsEqual = (arr1, arr2) => {
 }
 
 const getNextLocation = (startRow, startCol, endRow, endCol) => {
-        let row = startRow;
-        let col = startCol;
+    let row = startRow;
+    let col = startCol;
 
+    if ((row < N_TILES) && (row >= 0)) {
         if (startRow < endRow) {
             row++;
         } else if (startRow > endRow) {
             row--;
         }
-        
+    }
+
+    if ((col < N_TILES) && (col >= 0)) {
         if (startCol < endCol) {
             col++;
         } else if (startCol > endCol) {
             col--;
         }
-        return [row, col];
-    }
+    }  
+    return [row, col];
+}
 
 
 
@@ -174,7 +180,7 @@ class Entity {
 
         this.currentRow = row;
         this.currentCol = col;
-        
+
         this.targetRow = row;
         this.targetCol = col;
 
@@ -196,16 +202,22 @@ class Entity {
 
     }
 
+    updateNextLocation() {
+        [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
+    }
+
     alignWith(element) {
         this.element.style.top = `${element.offsetTop}px`;
         this.element.style.left = `${element.offsetLeft}px`;
     }
 
     alignWithGrid() {
-        if (this.grid == undefined) {
-            console.warn(this, "alignWithGrid: entity doesn't have a reference to grid.");
-            return;
-        }
+        /*
+            if (this.grid == undefined) {
+                console.warn(this, "alignWithGrid: entity doesn't have a reference to grid.");
+                return;
+            }
+        */
         let tile = this.grid.tile(this.currentRow, this.currentCol);
         this.alignWith(tile);
     }
@@ -215,6 +227,10 @@ class Entity {
         this.element.style.top = `${y}px`;
     }
 
+    resetAnimation() {
+        this.anim.isRunning = false;
+    }
+
     isAtTarget() {
         return ((this.currentRow === this.targetRow) && (this.currentCol === this.targetCol));
     }
@@ -222,7 +238,7 @@ class Entity {
     isAtNext() {
         return ((this.currentRow === this.nextRow) && (this.currentCol === this.nextCol));
     }
-    
+
 //     updateFrame() {
 //         if (this.lock) {
 //             // console.warn('locked.', this);
@@ -233,7 +249,7 @@ class Entity {
 //         }
 //         [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
 //         // console.warn(`Next Location = (${this.nextRow}, ${this.nextCol})`)
-        
+
 //         let [x0, y0] = this.grid.locationToXY(this.currentRow, this.currentCol);
 //         let [xf, yf] = this.grid.locationToXY(this.nextRow, this.nextCol);
 //         let pace = this.pace;
@@ -241,15 +257,16 @@ class Entity {
 //         startFrameLoop(x0, y0, xf, yf, ent);
 //     }
 
-    doFrame(timestamp) 
+    doFrame(timestamp)
     {
         // If the entity is already at it's target, there is no need to move.
         if (this.isAtTarget()) {
+            this.alignWithGrid();
             return;
         }
 
         // The animation is done once it's reached the next tile (or it hasn't started yet.)
-        if (this.anim.isDone) {
+        if (this.anim.isRunning !== true) {
 
             // Restart the start/finish time to ensure the entity. reaches the next tile at the correct time.
             // This maintains a consistent animation regardless of how much time has passed between
@@ -262,9 +279,9 @@ class Entity {
             [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
             [this.anim.x0, this.anim.y0] = this.grid.locationToXY(this.currentRow, this.currentCol);
             [this.anim.xf, this.anim.yf] = this.grid.locationToXY(this.nextRow, this.nextCol);
-            
-            // Save the animation state.
-            this.anim.isDone = false;
+
+            // Running state of the animation.
+            this.anim.isRunning = true;
         }
 
         // At this point, the animation is running.
@@ -278,7 +295,7 @@ class Entity {
             this.currentRow = this.nextRow;
             this.currentCol = this.nextCol;
             this.alignWithGrid();
-            this.anim.isDone = true;
+            this.anim.isRunning = false;
             return;
         }
 
@@ -290,6 +307,8 @@ class Entity {
         this.alignWithPixel(x, y);
         return;
     }
+
+
 
 }
 
@@ -309,7 +328,7 @@ class Player extends Entity {
 
 
 
-/* 
+/*
 _______________________________________________________________________
                              State
 =======================================================================
@@ -340,9 +359,9 @@ class State {
 
 
 
- 
 
-/* 
+
+/*
 _______________________________________________________________________
                              Class Game
 =======================================================================
@@ -356,16 +375,16 @@ Information Travel
 
      [Display]  <---[User Interactions]
          |
-      [Game]          
+      [Game]
         |
      [State]  <---[Timers or Network Data ]
 
 _______________________________________________________________________
-*/ 
+*/
 
 export class Game {
     constructor() {
-        this.display = new Display(30, 30);
+        this.display = new Display(N_TILES, N_TILES);
         this.state = new State();
         startGame(this);
     }
@@ -374,10 +393,11 @@ export class Game {
         let p = new Player(key);
         this.state.players.set(key, p);
         this.display.add(key, p);
+        return p;
     }
 
     getPlayerElement(key) {
-        return this.display.getEle(key);
+        return this.display.ents.get(key);
     }
 
     setLocation(key, row, col) {
@@ -395,54 +415,102 @@ export class Game {
         let ent = this.state.players.get(key);
         ent.targetRow = row;
         ent.targetCol = col;
-        // ent.updateFrame();
     }
 };
 
-// startGame is a private function that launches the game for the first time.
-// it happens automatically after the Game object is created.
-let hasStarted = false;
-function startGame(game) {
 
-    // makes sure that this function doesn't run twice.
-    if (hasStarted) {
-        return;
+
+
+// NOTE: might have strange support for mozilla.  Doesn't support microsoft. 
+const initFullscreenHandlers = ()=> {
+
+    const requestFullscreen = ()=> {
+        if (document.body.webkitRequestFullScreen) {
+            document.body.webkitRequestFullScreen();
+        } else if (document.body.webkitRequestFullScreen) {
+            document.body.mozRequestFullScreen();
+        }
     }
 
+    const exitFullscreen = ()=> {
+        if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        }
+    }
+
+    const isFullScreen = ()=> {
+        return document.webkitIsFullScreen;
+    }
+
+    const fullscreenEnabled = ()=> {
+        if (document.webkitFullscreenEnabled) {
+            return document.webkitFullscreenEnabled;
+        } else if (document.mozFullScreenEnabled) {
+            return document.mozFullScreenEnabled
+        } else {
+            console.warn("Fullscreen mode cannot be determined.")
+            return undefined
+        }
+    }
+
+    const toggleFullScreen = (event)=> {
+        if (isFullScreen() === false) {
+            requestFullscreen();
+        } else {
+            exitFullscreen();
+        }
+    }
+
+    document.querySelector('#menubar').addEventListener('click', toggleFullScreen)    
+}
+
+
+function initEventListeners() {
+    initFullscreenHandlers();
+}
+
+
+
+/*
+_______________________________________________________________________
+                              M A I N 
+=======================================================================
+*/
+function startGame(game) {
+    GAME = game;
     test(game);
-    
-    // declare that the game has started.
-    hasStarted = true;
+    initEventListeners();
 }
 
 
 
 
-
-/* 
+/*
 _______________________________________________________________________
-                             Testing Area ! 
+                             Testing Area !
 =======================================================================
-*/ 
+*/
 function test(game) {
-    GAME = game;
 
     // add a player to the game map.
-    game.addPlayer(ME);
+    let MYPLAYER = game.addPlayer(ME);
     game.setLocation(ME, 1, 2);
     game.setTarget(ME, 1, 3);
+    MYPLAYER.element.classList.add('myplayer');
+
 
     // used for random names.
     let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randString = (n) => {
+    const randString = (n) => {
         let s = "";
         for (let i=0; i<n; i++) {
             s += possible.charAt(Math.floor(Math.random()*possible.length));
-        }        
+        }
         return s;
     }
-    let randTile = () => Math.floor(Math.random() * N_TILES);
-    
+    const randTile = () => Math.floor(Math.random() * N_TILES);
 
     // Add 10 random players, moving to random locations.
     for (let i=0; i<10; i++) {
@@ -455,21 +523,22 @@ function test(game) {
         game.setLocation(name, startX, startY);
         game.setTarget(name, targetX, targetY);
     }
-    
-    
+
+
     let me = game.players
 
-    let doHighlight = function(event) {
+    let handleClickEvent = (event) => {
+        // console.log("Clicked on:", event.target);
         if (!event.target.classList.contains('tile')) {
             return;
         }
         let [row, col] = game.display.grid.locationOfTile(event.target);
-        console.log('Clicked:', event.target, `location:(${row}, ${col})`, ME);
+        // console.log('Clicked:', event.target, `location:(${row}, ${col})`, ME);
         game.setTarget(ME, row, col);
     }
-    
+
     console.log(game.display.ents);
-    game.display.element.addEventListener('mousedown', doHighlight);
+    game.display.element.addEventListener('mousedown', handleClickEvent);
 
     window.requestAnimationFrame(mainloop);
 }
@@ -510,10 +579,9 @@ _______________________________________________________________________
 // }
 
 
-const mainloop = (timestamp) => {
+function mainloop(timestamp) {
     for (let [key, ent] of GAME.display.ents) {
         ent.doFrame(timestamp);
     }
     window.requestAnimationFrame(mainloop);
 }
-
