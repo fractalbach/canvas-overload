@@ -2,7 +2,6 @@
 ============================================================= */
 #Display {
     position: fixed;
-    display: grid;
     overflow: auto;
 }
 
@@ -17,15 +16,15 @@ body {
 }
 
 .layer {
+    top: 0;
+    left: 0;
     position: absolute;
+    white-space: nowrap;
 }
 
 /*               Overlapping Game Layers
 ============================================================= */
-#Display > * {
-    grid-row: 1 / 1;
-    grid-column: 1 / 1;
-    background: transparent;
+#Display > * {    
     pointer-events: none;
 }
 
@@ -33,17 +32,29 @@ body {
     pointer-events: auto;
 }
 
-#DisplayEnts {
-    width: 0;
-    height: 0;
-}
 
-/*                       Tile Effects
+/*                Tiles, Players, and Entities
 ============================================================= */
 .tile {
+    z-index: 40;
     background: green;
     border: 1px solid #012;
 }
+
+.player {
+    z-index: 60;
+    position: absolute;
+    background: blue;
+    border: 1px transparent solid;
+    margin: 0px;
+}
+
+.myplayer {
+    z-index: 50;
+    background: #73e;
+    border: 1px #f93 solid;
+}
+
 
 .player:hover, .tile:hover {
     border: 1px #c0ffee solid;
@@ -56,9 +67,6 @@ body {
 
 /*              Auto-adjusting Tile Widths & Heights
 ============================================================= */
-#DisplayGrid {
-    white-space: nowrap;
-}
 
 .player, .tile {
     min-width: 20px;
@@ -68,8 +76,7 @@ body {
 }
 
 .tileRow {
-    height: auto;
-    display: flex;
+    display: inline-grid;
 }
 
 /*             Landscape / Portrait Media Modes
@@ -108,8 +115,6 @@ body {
         right: 0;
         top: 3em;
         bottom: 0;
-        display: flex;
-        white-space: nowrap;
     }
 
     #menubar {
@@ -120,19 +125,7 @@ body {
     }
 }
 
-/*                      Player Canvas
-============================================================= */
-.player {
-    background: blue;
-    border: 1px transparent solid;
-    margin: 0px;
-    position: relative;
-}
 
-.myplayer {
-    background: #73e;
-    border: 1px #f93 solid;
-}
 
 /*                   Highlighted Objects
 ============================================================= */
@@ -149,4 +142,19 @@ body {
     color: white;
     user-select: none;
     pointer-events: none;
+}
+
+
+
+/*                         Debug Box
+============================================================= */
+#debug {
+    user-select: none;
+    pointer-events: none;
+    bottom: 1em;
+    left: 0;
+    position: fixed;
+    background: #c23c3c94;
+    color: white;
+    padding: 1em;
 }

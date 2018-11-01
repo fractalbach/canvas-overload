@@ -7,11 +7,18 @@ _______________________________________________________________________
 */
 
 const TILE_SIZE = 50;
-const N_TILES = 30;
+const N_TILES = 40;
 const ME = "myplayer";
+
+const DEBUG_ELEMENT = document.querySelector('#debug');
+const DISPLAY_ELEMENT = document.querySelector('#Display');
+const GRID_ELEMENT = document.querySelector('#DisplayGrid');
+const ENTS_ELEMENT = document.querySelector('#DisplayEnts');
 
 var MYPLAYER;
 var GAME;
+
+
 
 /*
 _______________________________________________________________________
@@ -125,7 +132,7 @@ class Grid {
     }
 
     locationToXY(row, col) {
-        let tile = this.tile(row, col);
+        let tile = this.matrix[row][col];
         return [tile.offsetLeft, tile.offsetTop];
     }
 }
@@ -152,7 +159,7 @@ const getNextLocation = (startRow, startCol, endRow, endCol) => {
     let row = startRow;
     let col = startCol;
 
-    if ((row < N_TILES) && (row >= 0)) {
+    if ((startRow < N_TILES) && (startRow >= 0)) {
         if (startRow < endRow) {
             row++;
         } else if (startRow > endRow) {
@@ -181,29 +188,31 @@ class Entity {
         this.currentRow = row;
         this.currentCol = col;
 
-        this.targetRow = row;
-        this.targetCol = col;
-
         this.nextRow = row;
         this.nextCol = col;
 
+        this.targetRow = row;
+        this.targetCol = col;
+
         this.pace = 300;
-        this.lock = false;
 
         this.anim = {
-            isDone: true,
-            x0: 0,
-            y0: 0,
-            xf: 0,
-            yf: 0,
+            isRunning: false,
             t0: 0,
-            tf: 0
+            tf: 0,
+            x0: 0,
+            xf: 0,
+            y0: 0,
+            yf: 0,
         };
-
     }
 
-    updateNextLocation() {
-        [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
+    // TODO:
+    // make this "set Target() {}" once you prevent that 'weird stack overflow problem'
+    // caused by circular calls to get and set.
+    setTarget(row, col) {
+        this.targetRow = row;
+        this.targetCol = col;
     }
 
     alignWith(element) {
@@ -212,53 +221,20 @@ class Entity {
     }
 
     alignWithGrid() {
-        /*
-            if (this.grid == undefined) {
-                console.warn(this, "alignWithGrid: entity doesn't have a reference to grid.");
-                return;
-            }
-        */
         let tile = this.grid.tile(this.currentRow, this.currentCol);
         this.alignWith(tile);
     }
 
     alignWithPixel(x, y) {
-        this.element.style.left = `${x}px`;
         this.element.style.top = `${y}px`;
-    }
-
-    resetAnimation() {
-        this.anim.isRunning = false;
+        this.element.style.left = `${x}px`;
     }
 
     isAtTarget() {
         return ((this.currentRow === this.targetRow) && (this.currentCol === this.targetCol));
     }
-
-    isAtNext() {
-        return ((this.currentRow === this.nextRow) && (this.currentCol === this.nextCol));
-    }
-
-//     updateFrame() {
-//         if (this.lock) {
-//             // console.warn('locked.', this);
-//             return;
-//         }
-//         if (this.isAtTarget()) {
-//             return;
-//         }
-//         [this.nextRow, this.nextCol] = getNextLocation(this.currentRow, this.currentCol, this.targetRow, this.targetCol);
-//         // console.warn(`Next Location = (${this.nextRow}, ${this.nextCol})`)
-
-//         let [x0, y0] = this.grid.locationToXY(this.currentRow, this.currentCol);
-//         let [xf, yf] = this.grid.locationToXY(this.nextRow, this.nextCol);
-//         let pace = this.pace;
-//         let ent = this;
-//         startFrameLoop(x0, y0, xf, yf, ent);
-//     }
-
-    doFrame(timestamp)
-    {
+    
+    doFrame(timestamp) {
         // If the entity is already at it's target, there is no need to move.
         if (this.isAtTarget()) {
             this.alignWithGrid();
@@ -271,8 +247,8 @@ class Entity {
             // Restart the start/finish time to ensure the entity. reaches the next tile at the correct time.
             // This maintains a consistent animation regardless of how much time has passed between
             // each animation frame.
-            this.anim.t0 = performance.now();
-            this.anim.tf = this.anim.t0 + this.pace;
+            this.anim.t0 = timestamp;
+            this.anim.tf = timestamp + this.pace;
 
             // Calculate the pixel locations of the current tile and the next tile.
             // This provides points of reference for interpolation.
@@ -299,8 +275,6 @@ class Entity {
             return;
         }
 
-        // At this point, we are within the animation itself.
-
         // Calculate the new (x,y) through linear interpolation.
         let x = ((this.anim.xf - this.anim.x0) / (this.anim.tf - this.anim.t0))*t + this.anim.x0;
         let y = ((this.anim.yf - this.anim.y0) / (this.anim.tf - this.anim.t0))*t + this.anim.y0;
@@ -308,9 +282,8 @@ class Entity {
         return;
     }
 
-
-
 }
+
 
 class Player extends Entity {
     constructor(key) {
@@ -385,13 +358,12 @@ _______________________________________________________________________
 export class Game {
     constructor() {
         this.display = new Display(N_TILES, N_TILES);
-        this.state = new State();
+        // this.state = new State();
         startGame(this);
     }
 
     addPlayer(key) {
         let p = new Player(key);
-        this.state.players.set(key, p);
         this.display.add(key, p);
         return p;
     }
@@ -401,20 +373,18 @@ export class Game {
     }
 
     setLocation(key, row, col) {
-        if (!this.state.players.has(key)) {
+        if (!this.display.ents.has(key)) {
             console.warn(`setLocation: entity "${key}" was not found.`);
             return;
         }
-        let ent = this.state.players.get(key);
-        ent.currentRow = ent.targetRow = ent.nextRow = row;
-        ent.currentCol = ent.targetCol = ent.nextCol = col;
-        ent.alignWithGrid();
+        let ent = this.display.ents.get(key);
+        ent.currentRow = row;
+        ent.currentCol = col;
+        ent.setTarget(row, col);
     }
 
     setTarget(key, row, col) {
-        let ent = this.state.players.get(key);
-        ent.targetRow = row;
-        ent.targetCol = col;
+        this.display.ents.get(key).setTarget(row, col);
     }
 };
 
@@ -463,13 +433,40 @@ const initFullscreenHandlers = ()=> {
         }
     }
 
-    document.querySelector('#menubar').addEventListener('click', toggleFullScreen)    
+    document.querySelector('#menubar').addEventListener('click', toggleFullScreen)
 }
 
 
 function initEventListeners() {
     initFullscreenHandlers();
 }
+
+
+/*
+_______________________________________________________________________
+                          The Game Loop
+=======================================================================
+*/
+
+let lastFrameTimestamp = performance.now()
+let fpsCounter = 0;
+const countFPS = ()=> {
+    fpsCounter++;
+    if ((performance.now() - lastFrameTimestamp) >= 1000) {
+        lastFrameTimestamp = performance.now()
+        DEBUG_ELEMENT.innerText=`Frames per Second: ${fpsCounter}`;
+        fpsCounter = 0;
+    }
+}
+
+const mainloop = (timestamp)=> {
+    for (let [key, ent] of GAME.display.ents) {
+        ent.doFrame(timestamp);
+    }
+    countFPS();
+    window.requestAnimationFrame(mainloop);
+}
+
 
 
 
@@ -510,22 +507,22 @@ function test(game) {
         }
         return s;
     }
-    const randTile = () => Math.floor(Math.random() * N_TILES);
+    const randTile = ()=> Math.floor(Math.random() * N_TILES);
+    const randPace = ()=> Math.floor(Math.random() * 400) + 100;
 
     // Add 10 random players, moving to random locations.
-    for (let i=0; i<10; i++) {
+    for (let i=0; i<20; i++) {
         let name = randString(10);
         let startX = randTile();
         let startY = randTile();
         let targetX = randTile();
         let targetY = randTile();
-        game.addPlayer(name);
+        let p = game.addPlayer(name);
+        p.pace = randPace();
         game.setLocation(name, startX, startY);
         game.setTarget(name, targetX, targetY);
     }
 
-
-    let me = game.players
 
     let handleClickEvent = (event) => {
         // console.log("Clicked on:", event.target);
@@ -540,8 +537,22 @@ function test(game) {
     console.log(game.display.ents);
     game.display.element.addEventListener('mousedown', handleClickEvent);
 
+    lastFrameTimestamp = performance.now()
     window.requestAnimationFrame(mainloop);
 }
+
+
+// const snapEnts = ()=> {
+//     for (let [key, ent] of GAME.display.ents) {
+//         if (ent.anim.isRunning) {
+//             ent.currentRow = ent.nextRow;
+//             ent.currentCol = ent.nextCol;
+//             ent.anim.isRunning = false;    
+//         }
+//     }
+// }
+
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 END testing area.
@@ -551,37 +562,4 @@ _______________________________________________________________________
 
 
 
-// const startFrameLoop = (x0, y0, xf, yf, ent) => {
-//     let t0 = performance.now();
-//     let tf = t0 + ent.pace;
-//     let counter = 0;
-//     ent.lock = true;
 
-//     function frameStep(timestamp) {
-//         counter++;
-//         let t = timestamp - t0;
-//         if (tf < timestamp) {
-//             // console.warn(`Frame Loop Complete! Number of Steps: ${counter}`, ent);
-//             ent.currentRow = ent.nextRow;
-//             ent.currentCol = ent.nextCol;
-//             ent.alignWithGrid();
-//             ent.lock = false;
-//             ent.updateFrame();
-//             return;
-//         }
-//         let x = ((xf - x0) / (tf - t0))*t + x0;
-//         let y = ((yf - y0) / (tf - t0))*t + y0;
-//         ent.alignWithPixel(x, y);
-//         window.requestAnimationFrame(frameStep);
-//     }
-
-//     window.requestAnimationFrame(frameStep);
-// }
-
-
-function mainloop(timestamp) {
-    for (let [key, ent] of GAME.display.ents) {
-        ent.doFrame(timestamp);
-    }
-    window.requestAnimationFrame(mainloop);
-}
