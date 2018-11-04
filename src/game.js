@@ -216,8 +216,12 @@ class Entity {
     }
 
     alignWith(element) {
-        this.element.style.top = `${element.offsetTop}px`;
-        this.element.style.left = `${element.offsetLeft}px`;
+        if (this.element.style.top !== element.offsetTop) {
+            this.element.style.top = `${element.offsetTop}px`;
+        }
+        if (this.element.style.left !== element.offsetLeft) {
+            this.element.style.left = `${element.offsetLeft}px`;    
+        }
     }
 
     alignWithGrid() {

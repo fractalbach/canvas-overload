@@ -4,12 +4,43 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <meta name="title" content="More Tiles">
-        <meta name="description" content="A bunch of interactive tiles on a webpage!">
-        <meta name="author" content="Fractalbach">
+	<title>The Tile Game</title>
+        <meta name="title" content="The Tile Game">
+        <meta name="description" content="A multiplayer game in a world of tiles!">
+        <meta name="author" content="Chris Achenbach">
 
+	<link rel="preload" href="src/main.js" as="script">
+	<link rel="preload" href="src/game.js" as="script">
+	<link rel="preload" href="style.css" as="style">
         <link rel="stylesheet" href="style.css">
         <link rel="manifest" href="manifest.json">
+
+	<meta property="og:title" content="Tile Game!" />
+	<meta property="og:determiner" content="The" />
+	<meta property="og:type" content="game" />
+	<meta property="og:url" content="https://fractalbach.github.io/canvas-overload/" />
+	<meta property="og:image" content="https://fractalbach.github.io/canvas-overload/logo.png" />
+	<meta property="og:image:type" content="image/PNG" />
+	<meta property="og:image:width" content="400" />
+	<meta property="og:image:height" content="400" />
+	
+	<script type="application/ld+json">
+	  {
+	  "@context": "http://schema.org",
+	  "@type": "Game",
+	  "description":"The Tile Game!",
+	  "dateCreated":"4 Nov 2018",
+	  "dateModified":"4 Nov 2018",
+	  "version":"1.01",
+	  "url":"https://fractalbach.github.io/canvas-overload",
+	  "name":"The Tile Game!",
+	  "image":"https://fractalbach.github.io/canvas-overload/logo.png",
+	  "creator":{
+          "@type":"Person",
+          "name":"Chris Achenbach"
+	  }
+	  }
+	</script>
 
         <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-icon-57x57.png">
         <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-icon-60x60.png">
