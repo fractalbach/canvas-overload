@@ -194,7 +194,7 @@ class Entity {
         this.targetRow = row;
         this.targetCol = col;
 
-        this.pace = 300;
+        this.pace = 200;
 
         this.anim = {
             isRunning: false,
