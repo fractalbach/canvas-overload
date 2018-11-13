@@ -151,7 +151,7 @@ body {
 #debug {
     user-select: none;
     pointer-events: none;
-    bottom: 1em;
+    top: 0;
     left: 0;
     position: fixed;
     background: #c23c3c94;

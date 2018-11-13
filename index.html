@@ -3,28 +3,25 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
-	<title>The Tile Game</title>
+        <title>The Tile Game</title>
         <meta name="title" content="The Tile Game">
         <meta name="description" content="A multiplayer game in a world of tiles!">
         <meta name="author" content="Chris Achenbach">
-
-	<link rel="preload" href="src/main.js" as="script">
-	<link rel="preload" href="src/game.js" as="script">
-	<link rel="preload" href="style.css" as="style">
+        <link rel="preload" href="src/main.js" as="script">
+        <link rel="preload" href="src/game.js" as="script">
+        <link rel="preload" href="style.css" as="style">
         <link rel="stylesheet" href="style.css">
         <link rel="manifest" href="manifest.json">
-
-	<meta property="og:title" content="Tile Game!" />
-	<meta property="og:determiner" content="The" />
-	<meta property="og:type" content="game" />
-	<meta property="og:url" content="https://fractalbach.github.io/canvas-overload/" />
-	<meta property="og:image" content="https://fractalbach.github.io/canvas-overload/logo.png" />
-	<meta property="og:image:type" content="image/PNG" />
-	<meta property="og:image:width" content="400" />
-	<meta property="og:image:height" content="400" />
-	
-	<script type="application/ld+json">
+        <meta property="og:title" content="Tile Game!"/>
+        <meta property="og:determiner" content="The"/>
+        <meta property="og:type" content="game"/>
+        <meta property="og:url" content="https://fractalbach.github.io/canvas-overload/"/>
+        <meta property="og:image" content="https://fractalbach.github.io/canvas-overload/logo.png"/>
+        <meta property="og:image:type" content="image/PNG"/>
+        <meta property="og:image:width" content="400"/>
+        <meta property="og:image:height" content="400"/>
+        <script type="application/ld+json">
+            
 	  {
 	  "@context": "http://schema.org",
 	  "@type": "Game",
@@ -40,8 +37,8 @@
           "name":"Chris Achenbach"
 	  }
 	  }
-	</script>
-
+	
+        </script>
         <link rel="apple-touch-icon" sizes="57x57" href="icons/apple-icon-57x57.png">
         <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-icon-60x60.png">
         <link rel="apple-touch-icon" sizes="72x72" href="icons/apple-icon-72x72.png">
@@ -65,13 +62,66 @@
             <div class="layer" id="DisplayEnts"></div>
         </div>
         <div id="menubar">
-            <h1 id="menu-title">The Tile Game!</h1>
+            <h1 id="menu-title">Press this bar for Fullscreen</h1>
             <div id="menubutton"></div>
         </div>
-        <div id="debug"> </div>
+        <div id="debug"></div>
+        <div id="left-controls">
+            <svg id="svg-arrow-keys" width="100" height="100" viewbox="0 0 100 100" preserveAspectRatio="">
+                <polygon class="svgArrowButton" id="svg-left-arrow-button" points="0,0 50,50 0,100 0,0" fill="#333"/>
+                <polygon class="svgArrowButton" id="svg-up-arrow-button" points="0,0 50,50 100,0 0,0" fill="#444"/>
+                <polygon class="svgArrowButton" id="svg-right-arrow-button" points="0,100 50,50 100,100 0,100" fill="#555"/>
+                <polygon class="svgArrowButton" id="svg-down-arrow-button" points="100,0 50,50 100,100 100,0" fill="#666"/>
+                <polygon class="arrow-icon" fill="#fff" stroke="#eee" points="45,40 55,40 55,18 65,20 50,5 35,20 45,18"/>
+        </div>
+        <div id="right-controls">
+            <svg id="svg-arrow-keys" width="100" height="100" viewbox="0 0 100 100" preserveAspectRatio="">
+                <circle class="svgButton" cx="70" cy="30" r="25" fill="#008" stroke="#fff"/>
+                <circle class="svgButton" cx="30" cy="70" r="25" fill="#008" stroke="#fff"/>
+            </svg>
+        </div>
+        <style>
+            #left-controls {
+                position: fixed;
+                left: 0;
+                right: calc(100% - 10em);
+                bottom: 0;
+                top: calc(100% - 10em);
+                background: #600;
+            }
+
+            #right-controls {
+                position: fixed;
+                left: calc(100% - 10em);
+                right: 0;
+                bottom: 0;
+                top: calc(100% - 10em);
+                background: #600;
+            }
+
+            #svg-arrow-keys {
+                height: 100%;
+                width: 100%;
+            }
+
+            .arrow-icon {
+                pointer-events: none;
+            }
+
+
+            .svgButton:active {
+                fill: #cff;
+                stroke: #000;
+                pointer:
+            }
+
+            .svgArrowButton:active {
+                fill: #599;
+            }
+        </style>
         <script type="module" src="src/main.js"></script>
         <script>
-        /*
+            /*
             if ('serviceWorker'in navigator) {
                 navigator.serviceWorker.register('src/sw.js');
             }

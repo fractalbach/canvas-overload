@@ -467,6 +467,11 @@ const mainloop = (timestamp)=> {
     for (let [key, ent] of GAME.display.ents) {
         ent.doFrame(timestamp);
     }
+    if (MYPLAYER) {
+        let x = MYPLAYER.element.offsetLeft - DISPLAY_ELEMENT.clientWidth/2;
+        let y = MYPLAYER.element.offsetTop - DISPLAY_ELEMENT.clientHeight/2;
+        DISPLAY_ELEMENT.scroll(x, y);
+    }
     countFPS();
     window.requestAnimationFrame(mainloop);
 }
@@ -496,9 +501,9 @@ _______________________________________________________________________
 function test(game) {
 
     // add a player to the game map.
-    let MYPLAYER = game.addPlayer(ME);
-    game.setLocation(ME, 1, 2);
-    game.setTarget(ME, 1, 3);
+    MYPLAYER = game.addPlayer(ME);
+    game.setLocation(ME, 15, 15);
+    game.setTarget(ME, 14, 14);
     MYPLAYER.element.classList.add('myplayer');
 
 
@@ -535,7 +540,7 @@ function test(game) {
         }
         let [row, col] = game.display.grid.locationOfTile(event.target);
         // console.log('Clicked:', event.target, `location:(${row}, ${col})`, ME);
-        game.setTarget(ME, row, col);
+        // game.setTarget(ME, row, col);
     }
 
     console.log(game.display.ents);
@@ -567,3 +572,15 @@ _______________________________________________________________________
 
 
 
+document.querySelector('#svg-left-arrow-button').addEventListener('click', (e)=> {
+     MYPLAYER.setTarget(MYPLAYER.currentRow - 1, MYPLAYER.currentCol)
+});
+document.querySelector('#svg-right-arrow-button').addEventListener('click', (e)=> {
+     MYPLAYER.setTarget(MYPLAYER.currentRow, MYPLAYER.currentCol + 1)
+});
+document.querySelector('#svg-down-arrow-button').addEventListener('click', (e)=> {
+     MYPLAYER.setTarget(MYPLAYER.currentRow + 1 , MYPLAYER.currentCol)
+});
+document.querySelector('#svg-up-arrow-button').addEventListener('click', (e)=> {
+     MYPLAYER.setTarget(MYPLAYER.currentRow, MYPLAYER.currentCol - 1)
+});
